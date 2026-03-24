@@ -32,6 +32,12 @@ Detailed docs:
 - `wiring/collegamenti_esp32c3_ra02.md`
 - `wiring/collegamenti_ascii.txt`
 
+## Project structure
+
+- `firmware/` -> ESP32 firmware (A1/B1)
+- `wiring/` -> wiring docs
+- `android/LoRaCommunications/` -> Android app project (USB chat + bench tools)
+
 ## Firmware files
 
 - `firmware/esp32c3_lora_chat_A1.ino` -> flash on node A1
