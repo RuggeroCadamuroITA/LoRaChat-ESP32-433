@@ -48,6 +48,19 @@ Open Serial Monitor at `115200` and send:
 
 If no `/to` is used, message is sent to the default peer of that node.
 
+### Stress test / max throughput check
+
+Implemented command to continuously transmit and print real delta between packets:
+
+- `/bench on` -> starts bench at 1 ms interval to default peer
+- `/bench on 1 B1` -> starts bench at 1 ms targeting B1 (example)
+- `/bench off` -> stops bench mode
+
+During bench, serial logs lines like:
+- `[BENCH TX] n=123 dt_ms=1 dt_us=1043`
+
+This helps estimate practical minimum spacing and throughput limits for your setup.
+
 ## LoRa settings
 
 - Frequency: `433.775 MHz`

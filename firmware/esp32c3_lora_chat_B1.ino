@@ -1,4 +1,4 @@
-/* Nodo B1 - ESP32-C3 + RA-02 433MHz */
+/* Nodo A1 - ESP32-C3 + RA-02 433MHz */
 #include <SPI.h>
 #include <LoRa.h>
 
@@ -31,6 +31,16 @@ uint32_t ackDeadline = 0;
 int retryCount = 0;
 String serialLine;
 
+// ===== BENCH MODE =====
+bool benchMode = false;
+String benchTarget = DEFAULT_PEER;
+uint32_t benchIntervalMs = 1;          // richiesta: ogni 1 ms
+uint32_t benchLastTxMs = 0;
+uint32_t benchCount = 0;
+uint32_t benchLastDeltaMs = 0;
+uint32_t benchLastDeltaUs = 0;
+uint32_t benchLastTxUs = 0;
+
 void sendPacketRaw(const String& frame){ LoRa.beginPacket(); LoRa.print(frame); LoRa.endPacket(); }
 String esc(String s){ s.replace("|", "/"); s.replace("\n"," "); s.replace("\r"," "); return s; }
 
@@ -38,6 +48,31 @@ void sendMsg(const String& to, const String& payload, uint32_t seq, bool retry=f
   String frame = "MSG|" + String(NODE_ID) + "|" + to + "|" + String(seq) + "|" + esc(payload);
   sendPacketRaw(frame);
   Serial.println((retry?"[RETRY TX] ":"[TX] ") + frame);
+}
+
+void sendBenchMsg(){
+  uint32_t nowMs = millis();
+  uint32_t nowUs = micros();
+
+  if (benchLastTxMs == 0) {
+    benchLastDeltaMs = 0;
+    benchLastDeltaUs = 0;
+  } else {
+    benchLastDeltaMs = nowMs - benchLastTxMs;
+    benchLastDeltaUs = nowUs - benchLastTxUs;
+  }
+
+  benchLastTxMs = nowMs;
+  benchLastTxUs = nowUs;
+
+  benchCount++;
+  String payload = "BENCH#" + String(benchCount) + " dt_ms=" + String(benchLastDeltaMs) + " dt_us=" + String(benchLastDeltaUs);
+  String frame = "MSG|" + String(NODE_ID) + "|" + benchTarget + "|" + String(localSeq++) + "|" + payload;
+  sendPacketRaw(frame);
+
+  Serial.print("[BENCH TX] n="); Serial.print(benchCount);
+  Serial.print(" dt_ms="); Serial.print(benchLastDeltaMs);
+  Serial.print(" dt_us="); Serial.println(benchLastDeltaUs);
 }
 
 void sendAck(const String& to, uint32_t seq){
@@ -83,13 +118,68 @@ void processIncoming(const String& frame, int rssi, float snr){
   }
 }
 
+void handleBench(){
+  if (!benchMode) return;
+  if (benchIntervalMs == 0) benchIntervalMs = 1;
+
+  uint32_t now = millis();
+  if ((uint32_t)(now - benchLastTxMs) >= benchIntervalMs) {
+    sendBenchMsg();
+  }
+}
+
 void readSerialCommands(){
   while(Serial.available()){
     char c=(char)Serial.read();
     if(c=='\n'){
       serialLine.trim();
       if(serialLine.length()>0){
-        if(serialLine.startsWith("/to ")){
+        // bench commands
+        // /bench on
+        // /bench on 1
+        // /bench on 1 B1
+        // /bench off
+        if (serialLine.startsWith("/bench ")) {
+          if (serialLine == "/bench off") {
+            benchMode = false;
+            Serial.println("[BENCH] OFF");
+          } else if (serialLine.startsWith("/bench on")) {
+            benchIntervalMs = 1;
+            benchTarget = DEFAULT_PEER;
+
+            // parsing opzionale
+            // /bench on <ms> <target>
+            int firstSpace = serialLine.indexOf(' ', 10); // dopo '/bench on '
+            String tail = "";
+            if (serialLine.length() > 10) tail = serialLine.substring(10);
+            tail.trim();
+
+            if (tail.length() > 0) {
+              int sp = tail.indexOf(' ');
+              if (sp < 0) {
+                benchIntervalMs = (uint32_t)max(1, tail.toInt());
+              } else {
+                String msStr = tail.substring(0, sp);
+                String tStr = tail.substring(sp + 1);
+                msStr.trim(); tStr.trim();
+                benchIntervalMs = (uint32_t)max(1, msStr.toInt());
+                if (tStr.length() > 0) benchTarget = tStr;
+              }
+            }
+
+            benchMode = true;
+            benchCount = 0;
+            benchLastTxMs = 0;
+            benchLastTxUs = 0;
+
+            Serial.print("[BENCH] ON interval_ms="); Serial.print(benchIntervalMs);
+            Serial.print(" target="); Serial.println(benchTarget);
+          } else {
+            Serial.println("[ERR] uso bench: /bench on [ms] [target]  oppure  /bench off");
+          }
+        }
+        // normal chat
+        else if(serialLine.startsWith("/to ")){
           int sp1=serialLine.indexOf(' ',4);
           if(sp1>0){
             String to=serialLine.substring(4,sp1);
@@ -108,6 +198,8 @@ void readSerialCommands(){
 void setup(){
   Serial.begin(115200); delay(1500);
   Serial.println("Nodo B1 pronto");
+  Serial.println("Comandi: /to <ID> <msg> | /bench on [ms] [target] | /bench off");
+
   SPI.begin(PIN_SCK, PIN_MISO, PIN_MOSI, PIN_SS);
   LoRa.setPins(PIN_SS, PIN_RST, PIN_DIO0);
   if(!LoRa.begin(LORA_FREQ)){ Serial.println("[FATAL] LoRa begin fallito"); while(true) delay(1000); }
@@ -127,5 +219,8 @@ void loop(){
     String frame=""; while(LoRa.available()) frame += (char)LoRa.read();
     processIncoming(frame, LoRa.packetRssi(), LoRa.packetSnr());
   }
+
   handleRetryTimeout();
+  handleBench();
 }
+
