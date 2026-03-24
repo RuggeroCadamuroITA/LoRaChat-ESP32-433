@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoRa Communication</title>
+<style>
+body{margin:0;background:#000;color:#eee;font-family:system-ui, sans-serif}
+.header{padding:10px 12px;background:#111;border-bottom:1px solid #222}
+.title{font-size:18px;font-weight:bold}
+.status{color:#aaa;font-size:13px;margin-top:4px}
+.section{padding:10px 12px;border-bottom:1px solid #222}
+.section-title{font-weight:bold;margin-bottom:8px;color:#ccc}
+.btn{background:#1a1a1a;color:#fff;border:1px solid #333;padding:8px 12px;cursor:pointer}
+.btn:hover{background:#222}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row .btn{flex:1}
+.chat{height:220px;overflow:auto;background:#0d0d0d;padding:10px;font-family:monospace}
+.log{height:120px;overflow:auto;background:#080808;padding:10px;font-family:monospace;font-size:12px}
+.input-row{display:flex;gap:8px;margin-top:8px}
+.input-row input{flex:1;padding:8px;background:#121212;color:#fff;border:1px solid #333}
+.summary{color:#9ad1ff;font-size:12px;margin-top:6px}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="title">LoRa Communications</div>
+  <div class="status" id="status">Stato: non connesso</div>
+</div>
+
+<div class="section">
+  <div class="section-title">Connessione</div>
+  <div class="row">
+    <button class="btn" onclick="send('/connect')">Connetti</button>
+    <button class="btn" onclick="send('/disconnect')">Disconnetti</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Chat</div>
+  <div class="chat" id="chat"></div>
+  <div class="input-row">
+    <input id="msg" placeholder="Messaggio">
+    <button class="btn" onclick="sendMsg()">Invia</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Bench</div>
+  <div class="summary" id="benchSummary">Bench: inattivo</div>
+  <div class="row">
+    <button class="btn" onclick="send('/bench?ms=1')">Bench 1ms</button>
+    <button class="btn" onclick="send('/bench?ms=10')">Bench 10ms</button>
+    <button class="btn" onclick="send('/bench?ms=50')">Bench 50ms</button>
+    <button class="btn" onclick="send('/benchstop')">Stop</button>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Debug</div>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+function send(path){fetch(path).then(r=>r.text()).then(t=>{});}
+function sendMsg(){
+  var m=document.getElementById('msg').value;
+  if(!m)return;
+  fetch('/send?msg='+encodeURIComponent(m)).then(r=>r.text()).then(t=>{});
+  document.getElementById('msg').value='';
+}
+function poll(){
+  fetch('/state').then(r=>r.json()).then(s=>{
+    document.getElementById('status').innerText='Stato: '+(s.connected?'connesso':'non connesso');
+    document.getElementById('chat').innerText=s.chat;
+    document.getElementById('log').innerText=s.log;
+    document.getElementById('benchSummary').innerText=s.bench;
+  });
+}
+setInterval(poll, 500);
+</script>
+</body>
+</html>

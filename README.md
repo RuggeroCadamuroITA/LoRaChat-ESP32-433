@@ -42,8 +42,14 @@ Detailed docs:
 
 - `firmware/esp32c3_lora_chat_A1.ino` -> flash on node A1
 - `firmware/esp32c3_lora_chat_B1.ino` -> flash on node B1
+- `firmware/index.html` -> web UI preview (same as ESP web UI)
 
 Both firmwares are functionally the same but already preconfigured with opposite node IDs.
+
+### WiFi Web UI (new)
+- ESP hosts AP: **LoRa Communication** (password: `loracomm123`)
+- After connecting, open browser to `http://192.168.4.1`
+- UI features: chat, bench, debug, OTA updates (ElegantOTA)
 
 ## Serial usage
 
