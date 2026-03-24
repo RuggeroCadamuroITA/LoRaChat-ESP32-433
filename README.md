@@ -89,11 +89,36 @@ This helps estimate practical minimum spacing and throughput limits for your set
 - Always connect antenna before transmitting.
 - Use 433MHz antenna with 433MHz module.
 
+## Android app (included)
+
+Path: `android/LoRaCommunications/`
+
+Main features:
+- USB-C serial connection to ESP32 (`115200`)
+- Clean chat area + separate debug area (toggle from Settings)
+- Settings menu with Bench tools
+- Bench dialog with:
+  - interval (ms)
+  - warning threshold (ms)
+  - critical threshold (ms)
+  - start/stop/export `.txt`
+- Live bench summary with colored status:
+  - normal (blue)
+  - warning (yellow)
+  - critical (red)
+- Audio alerts for warning/critical
+- Full black professional UI theme
+
+Android notes:
+- Uses USB host mode
+- Handles Android 13+/14+ receiver export flags
+- Safe insets handling for status bar + keyboard (IME)
+
 ## Roadmap
 
 - [x] Two-node LoRa chat over serial
 - [x] ACK + retry
-- [ ] Android app (USB-C serial UI)
+- [x] Android app (USB-C serial UI + bench)
 - [ ] Packet encryption/authentication layer
 - [ ] Optional GPS sharing mode
 
