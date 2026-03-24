@@ -255,7 +255,7 @@ body{margin:0;background:#000;color:#eee;font-family:system-ui, sans-serif}
 
 <div class="section">
   <div class="section-title">Chat</div>
-  <div class="chat" id="chat" style="height:340px;"></div>
+  <div class="chat" id="chat" style="height:460px;"></div>
   <div class="input-row">
     <input id="msg" placeholder="Messaggio">
     <button class="btn" onclick="sendMsg()">Invia</button>
