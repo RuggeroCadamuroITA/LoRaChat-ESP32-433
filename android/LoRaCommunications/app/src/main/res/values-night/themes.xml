@@ -1,0 +1,11 @@
+<resources>
+    <style name="Base.Theme.LoRaCommunications" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#111111</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#1E1E1E</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowBackground">#000000</item>
+    </style>
+</resources>
