@@ -47,9 +47,11 @@ Detailed docs:
 Both firmwares are functionally the same but already preconfigured with opposite node IDs.
 
 ### WiFi Web UI (new)
-- ESP hosts AP: **LoRa Communication** (password: `loracomm123`)
+- ESP hosts AP: **LoRa Communication** (open network, no password)
 - After connecting, open browser to `http://192.168.4.1`
 - UI features: chat, bench, debug, OTA updates (ElegantOTA)
+- Settings icon (gear) in top-right opens modal with Bench/Debug
+- Chat area height: 460px (full space, debug moved to modal)
 
 ## Serial usage
 
