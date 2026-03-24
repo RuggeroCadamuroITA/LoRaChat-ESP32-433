@@ -1,0 +1,18 @@
+CABLGGIO RAPIDO - ESP32-C3 Super Mini <-> RA-02
+
+ESP32-C3                         RA-02
+---------------------------------------------
+3V3        -------------------->  3.3V
+GND        -------------------->  GND
+GPIO4      -------------------->  SCK
+GPIO5      -------------------->  MISO
+GPIO6      -------------------->  MOSI
+GPIO7      -------------------->  NSS
+GPIO3      -------------------->  DIO0
+GPIO2      -------------------->  RST
+
+Antenna:
+RA-02 u.FL/IPEX -> pigtail -> antenna 433 MHz
+
+Ripeti identico su entrambi i dispositivi.
+Cambia solo NODE_ID nel firmware (A1/B1).
