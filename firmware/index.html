@@ -6,9 +6,11 @@
 <title>LoRa Communication</title>
 <style>
 body{margin:0;background:#000;color:#eee;font-family:system-ui, sans-serif}
-.header{padding:10px 12px;background:#111;border-bottom:1px solid #222}
-.title{font-size:18px;font-weight:bold}
-.status{color:#aaa;font-size:13px;margin-top:4px}
+.header{padding:10px 12px;background:#111;border-bottom:1px solid #222;display:flex;align-items:center;gap:10px}
+.title{font-size:18px;font-weight:bold;flex:1}
+.status{color:#aaa;font-size:13px}
+.settings-btn{width:32px;height:32px;border-radius:50%;background:#1a1a1a;border:1px solid #333;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.settings-btn:hover{background:#222}
 .section{padding:10px 12px;border-bottom:1px solid #222}
 .section-title{font-weight:bold;margin-bottom:8px;color:#ccc}
 .btn{background:#1a1a1a;color:#fff;border:1px solid #333;padding:8px 12px;cursor:pointer}
@@ -16,16 +18,31 @@ body{margin:0;background:#000;color:#eee;font-family:system-ui, sans-serif}
 .row{display:flex;gap:8px;flex-wrap:wrap}
 .row .btn{flex:1}
 .chat{height:220px;overflow:auto;background:#0d0d0d;padding:10px;font-family:monospace}
-.log{height:120px;overflow:auto;background:#080808;padding:10px;font-family:monospace;font-size:12px}
 .input-row{display:flex;gap:8px;margin-top:8px}
 .input-row input{flex:1;padding:8px;background:#121212;color:#fff;border:1px solid #333}
 .summary{color:#9ad1ff;font-size:12px;margin-top:6px}
+/* Modal settings */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:10;align-items:center;justify-content:center}
+.modal.open{display:flex}
+.modal-content{background:#111;border:1px solid #333;padding:16px;width:90%;max-width:400px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.modal-title{font-weight:bold}
+.close-btn{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer}
+.section-modal{margin-bottom:12px}
+.section-modal .section-title{margin-bottom:6px}
+.log{height:120px;overflow:auto;background:#080808;padding:10px;font-family:monospace;font-size:12px}
 </style>
 </head>
 <body>
 <div class="header">
   <div class="title">LoRa Communications</div>
   <div class="status" id="status">Stato: non connesso</div>
+  <button class="settings-btn" id="settingsBtn" title="Impostazioni">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+      <circle cx="12" cy="12" r="3"></circle>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+    </svg>
+  </button>
 </div>
 
 <div class="section">
@@ -45,20 +62,30 @@ body{margin:0;background:#000;color:#eee;font-family:system-ui, sans-serif}
   </div>
 </div>
 
-<div class="section">
-  <div class="section-title">Bench</div>
-  <div class="summary" id="benchSummary">Bench: inattivo</div>
-  <div class="row">
-    <button class="btn" onclick="send('/bench?ms=1')">Bench 1ms</button>
-    <button class="btn" onclick="send('/bench?ms=10')">Bench 10ms</button>
-    <button class="btn" onclick="send('/bench?ms=50')">Bench 50ms</button>
-    <button class="btn" onclick="send('/benchstop')">Stop</button>
-  </div>
-</div>
+<!-- Modal Impostazioni -->
+<div class="modal" id="settingsModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">Impostazioni</div>
+      <button class="close-btn" id="closeSettings">&times;</button>
+    </div>
 
-<div class="section">
-  <div class="section-title">Debug</div>
-  <div class="log" id="log"></div>
+    <div class="section-modal">
+      <div class="section-title">Bench</div>
+      <div class="summary" id="benchSummary">Bench: inattivo</div>
+      <div class="row">
+        <button class="btn" onclick="send('/bench?ms=1')">Bench 1ms</button>
+        <button class="btn" onclick="send('/bench?ms=10')">Bench 10ms</button>
+        <button class="btn" onclick="send('/bench?ms=50')">Bench 50ms</button>
+        <button class="btn" onclick="send('/benchstop')">Stop</button>
+      </div>
+    </div>
+
+    <div class="section-modal">
+      <div class="section-title">Debug</div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -78,6 +105,18 @@ function poll(){
   });
 }
 setInterval(poll, 500);
+
+document.getElementById('settingsBtn').addEventListener('click', function() {
+  document.getElementById('settingsModal').classList.add('open');
+});
+document.getElementById('closeSettings').addEventListener('click', function() {
+  document.getElementById('settingsModal').classList.remove('open');
+});
+document.getElementById('settingsModal').addEventListener('click', function(e) {
+  if(e.target.id === 'settingsModal') {
+    document.getElementById('settingsModal').classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
