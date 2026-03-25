@@ -132,7 +132,7 @@ void processIncoming(const String& frame, int rssi, float snr) {
 }
 
 void handleBenchLine(const String& line) {
-  if (!line.contains("[BENCH TX]")) return;
+  if (line.indexOf("[BENCH TX]") == -1) return;
   benchPacketCount++;
 
   int idx = line.indexOf("dt_ms=");
