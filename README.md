@@ -2,6 +2,12 @@
 
 Long-range peer-to-peer text chat using **2x ESP32-C3 + 2x RA-02 (SX1278 433MHz)**.
 
+## Images
+
+![ESP32-C3 + RA-02 Setup 1](https://github.com/RuggeroCadamuroITA/LoRaChat-ESP32-433/blob/master/images/1.jpeg?raw=true)
+
+![ESP32-C3 + RA-02 Setup 2](https://github.com/RuggeroCadamuroITA/LoRaChat-ESP32-433/blob/master/images/2.jpeg?raw=true)
+
 This project is focused on a minimal and reliable stack:
 - LoRa data exchange (no display, no keypad)
 - USB serial console for testing/chat
