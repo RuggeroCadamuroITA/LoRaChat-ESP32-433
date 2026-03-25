@@ -10,7 +10,7 @@
 
 // WiFi AP
 const char* AP_SSID = "LoRa Communication";
-const char* AP_PASS = "";
+const char* AP_PASS = "loracomm123";
 
 WebServer server(80);
 
